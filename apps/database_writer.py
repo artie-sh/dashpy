@@ -5,7 +5,7 @@ import dateparser
 class CsvReader:
 
     db_path = '../prices.sqlite'
-    csv_path = 'xrp.csv'
+    csv_path = '../xrp1.csv'
 
     def read_file(self, file_name):
         formatted = list()
@@ -25,24 +25,29 @@ class CsvReader:
         conn = sqlite3.connect(db_path)
         return conn
 
-    def read_db(self, cur):
-        return list(cur.execute('SELECT * FROM xrp ORDER BY date asc'))
+    def read_db(self, cur, table):
+        return list(cur.execute('SELECT * FROM %s ORDER BY date asc' % table))
 
-    def write_line(self, cur, line):
-        cur.execute('INSERT INTO xrp (date, open, high, low, close) VALUES (?, ?, ?, ?, ?)',
+    def write_line(self, cur, line, table):
+        cur.execute('INSERT INTO %s (date, open, high, low, close) VALUES (?, ?, ?, ?, ?)' % table,
                     (line['date'], line['open'], line['high'], line['low'], line['close']))
+        print '%s, %s, %s, %s, %s, %s' % (table, line['date'], line['open'], line['high'], line['low'], line['close'])
 
-    def write_csv_to_db(self, csv, db):
+    def write_csv_to_db(self, csv, db, table):
         conn = self.connect_db(db)
         cur = conn.cursor()
+        cur.execute('DROP TABLE IF EXISTS %s' % table)
+        cur.execute('CREATE TABLE %s (date TEXT, open FLOAT, high FLOAT, low FLOAT, close FLOAT)' % table)
+        conn.commit()
         data = self.read_file(csv)
-        for line in data:
-            self.write_line(cur, line)
+        for line in data[1:]:
+            self.write_line(cur, line, table)
         conn.commit()
         conn.close()
 
 
-# c = CsvReader()
+#c = CsvReader()
+#c.write_csv_to_db(c.csv_path, c.db_path, 'xrp')
 # r = c.read_db(c.connect_db(c.db_path))
 # for line in r:
 #     print line
