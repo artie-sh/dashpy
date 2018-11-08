@@ -26,7 +26,7 @@ class CsvReader:
         return conn
 
     def read_db(self, cur):
-        return list(cur.execute('SELECT * FROM xrp'))
+        return list(cur.execute('SELECT * FROM xrp ORDER BY date asc'))
 
     def write_line(self, cur, line):
         cur.execute('INSERT INTO xrp (date, open, high, low, close) VALUES (?, ?, ?, ?, ?)',
@@ -40,3 +40,9 @@ class CsvReader:
             self.write_line(cur, line)
         conn.commit()
         conn.close()
+
+
+# c = CsvReader()
+# r = c.read_db(c.connect_db(c.db_path))
+# for line in r:
+#     print line

@@ -4,7 +4,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from database_writer import CsvReader
 from dash.dependencies import Input, Output
-
+import plotly.graph_objs as go
 
 class Aplication:
 
@@ -14,77 +14,71 @@ class Aplication:
 
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
     colors = { 'background': '#111111', 'text': '#7FDBFF' }
-    columns = {'date': 0, 'open': 1, 'high': 2, 'low': 3, 'close': 4}
+    columns_mapping = {'date': 0, 'open': 1, 'high': 2, 'low': 3, 'close': 4}
 
     def __init__(self):
         self.app = dash.Dash(__name__, external_stylesheets=self.external_stylesheets)
         self.db_reader = CsvReader()
         self.df = self.db_reader.read_db(self.db_reader.connect_db(self.db_reader.db_path))
-        self.buildGraph()
+        self.buildGraph('open')
 
         @self.app.callback(
-            Output(component_id='my-div', component_property='children'),
-            [Input(component_id='my-id', component_property='value')]
+            Output(component_id='graph', component_property='figure'),
+            [Input(component_id='options', component_property='value')]
         )
-        def update_output_div(input_value):
-            return 'You\'ve entered "{}"'.format(input_value)
+        def redraw_graph(input_value):
+            coords = self.getDataRows(self.df, input_value)
+            datax = []
+            datay = []
+            data = []
+            for key in sorted(coords.keys()):
+                datax.append(key)
+                datay.append(coords[key])
+            data.append(go.Scatter(x=datax, y=datay, mode='lines'))
+            return {
+                    'data': data,
+                    'layout': {'title': 'Dash Data Visualization'}
+                    }
 
         self.app.run_server(debug = True)
 
     def getDataRows(self, df, column_name):
         coords = dict()
         for row in df:
-            coords[row[0]] = row[self.columns[column_name]]
+            coords[row[0]] = row[self.columns_mapping[column_name]]
         return coords
 
-    def buildGraph(self):
-        coords_open = self.getDataRows(self.df, 'open')
-        coords_high = self.getDataRows(self.df, 'high')
-        coords_low = self.getDataRows(self.df, 'low')
-        coords_close = self.getDataRows(self.df, 'close')
+    def buildGraph(self, type):
+        coords = self.getDataRows(self.df, type)
 
         self.app.layout = html.Div(children=[
             html.H4(children='XRP/USD', style={'text-align':'center'}),
             html.Div(children=[
                 html.Div(children=
                     dcc.Graph(
-                        id='example-graph',
+                        id='graph',
                         figure={
-                            'data': [
-                                {'x': sorted(coords_open.keys()),
-                                 'y': [coords_open[key] for key in sorted(coords_open.keys())], 'type': 'linear',
-                                 'name': 'Open'},
-                                {'x': sorted(coords_high.keys()),
-                                 'y': [coords_high[key] for key in sorted(coords_high.keys())], 'type': 'linear',
-                                 'name': 'High'},
-                                {'x': sorted(coords_low.keys()),
-                                 'y': [coords_low[key] for key in sorted(coords_low.keys())], 'type': 'linear',
-                                 'name': 'Low'},
-                                {'x': sorted(coords_close.keys()),
-                                 'y': [coords_close[key] for key in sorted(coords_close.keys())], 'type': 'linear',
-                                 'name': 'Close'},
-                            ],
-                            'layout': {'title': 'Dash Data Visualization'}
+                            'data': {'x': coords.keys(), 'y': [coords[key] for key in coords.keys()], 'type': 'linear', 'name': type},
+                            'layout': {'title': 'Dash Data Visualization'},
                         }
                     ),
                     style={'display': 'table-cell', 'width': '95%', 'border': '1px solid blue'}
                 ),
                 html.Div(children=
-                    dcc.Checklist(
+                    dcc.RadioItems(
                         id='options',
                         options=[
-                            {'label': 'Open', 'value': 'open'},
-                            {'label': 'High', 'value': 'high'},
-                            {'label': 'Low', 'value': 'low'},
-                            {'label': 'Close', 'value': 'close'}
+                            {'label': 'open', 'value': 'open'},
+                            {'label': 'high', 'value': 'high'},
+                            {'label': 'low', 'value': 'low'},
+                            {'label': 'close', 'value': 'close'}
                         ],
-                        values=[]
+                        value='open'
                     ),
                     style={'text-align': 'left', 'display': 'table-cell', 'width':'5%', 'border': '1px solid green', 'vertical-align':'middle'}
                 )
             ]
             , style={'text-align':'center', 'border': '1px solid black', 'display': 'table', 'width':'100%'}),
-            dcc.Input(id='my-id', value='initial value', type='text'),
             html.Div(id='my-div', style={'border': '1px solid green'})
         ])
 
