@@ -35,35 +35,51 @@ class Aplication:
 
         self.app.run_server(debug = True)
 
+    def get_h4_header(self, header_text):
+        return html.H4(children=header_text, style={'text-align':'center'})
+
+    def get_radiobuttons(self, opts):
+        return html.Div(
+                        children=
+                                dcc.RadioItems(
+                                    id='options',
+                                    options=[{'label': option, 'value': option} for option in opts],
+                                    value='open'
+                                ),
+                                style={'text-align': 'left', 'display': 'table-cell', 'width':'5%', 'border': '1px solid green', 'vertical-align':'middle'}
+        )
 
     def draw_layout(self, type):
-        self.app.layout = html.Div(children=[
-            html.H4(children='XRP/USD', style={'text-align':'center'}),
+        self.app.layout = html.Div(
+                                children=[
+                                    self.get_h4_header('XRP/USD'),
 
-            html.Div(children=[
+                                    html.Div(
+                                        children=[
+                                            html.Div(
+                                                children=
+                                                    dcc.Graph(id='graph'),
+                                                    style={'display': 'table-cell', 'width': '95%', 'border': '1px solid blue'}
+                                                    ),
+                                                    self.get_radiobuttons(['open', 'close'])
+                                                ],
+                                                style={'text-align':'center', 'border': '1px solid black', 'display': 'table', 'width':'100%'}
+                                        ),
 
-                html.Div(children=
-                    dcc.Graph(id='graph'),
-                    style={'display': 'table-cell', 'width': '95%', 'border': '1px solid blue'}
-                ),
-
-                html.Div(children=
-                    dcc.RadioItems(
-                        id='options',
-                        options=[
-                            {'label': 'open', 'value': 'open'},
-                            {'label': 'high', 'value': 'high'},
-                            {'label': 'low', 'value': 'low'},
-                            {'label': 'close', 'value': 'close'}
-                        ],
-                        value='open'
-                    ),
-                    style={'text-align': 'left', 'display': 'table-cell', 'width':'5%', 'border': '1px solid green', 'vertical-align':'middle'}
-                )
-
-            ], style={'text-align':'center', 'border': '1px solid black', 'display': 'table', 'width':'100%'}),
-            html.Div
-        ])
+                                html.Div(
+                                    children=[
+                                        html.Div(
+                                            children='NoP: ',
+                                                style={'display': 'table-cell'}
+                                            ),
+                                        dcc.Input(
+                                            id='mav-periods',
+                                            style={'display': 'table-cell', 'width':'50px'}
+                                            ),
+                                        ],
+                                    style={'display': 'table'}
+                                )
+                            ])
 
 
 if __name__ == '__main__':
