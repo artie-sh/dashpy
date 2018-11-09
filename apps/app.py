@@ -20,29 +20,33 @@ class Aplication:
         self.app = dash.Dash(__name__, external_stylesheets=self.styles)
         self.db_reader = CsvReader()
         self.dp = DataProcessor(self.db_reader.read_db(self.db_reader.connect_db(self.db_reader.db_path), self.table_name))
-        self.buildGraph('open')
+        self.draw_layout('open')
 
         @self.app.callback(
             Output(component_id='graph', component_property='figure'),
             [Input(component_id='options', component_property='value')]
         )
-        def redraw_graph(input_value):
-            return {'data': [self.dp.getDataRows(input_value)]}
+        def draw_graph(input_value):
+            data_rows = self.dp.get_data_rows(input_value)
+            data_rows.name = input_value
+            mav = self.dp.calc_moving_average(150)
+            mav.name = 'mav'
+            return {'data': [data_rows, mav]}
 
         self.app.run_server(debug = True)
 
 
-    def buildGraph(self, type):
+    def draw_layout(self, type):
         self.app.layout = html.Div(children=[
             html.H4(children='XRP/USD', style={'text-align':'center'}),
+
             html.Div(children=[
+
                 html.Div(children=
-                    dcc.Graph(
-                        id='graph',
-                        figure={'data': [self.dp.getDataRows(type)]}
-                    ),
+                    dcc.Graph(id='graph'),
                     style={'display': 'table-cell', 'width': '95%', 'border': '1px solid blue'}
                 ),
+
                 html.Div(children=
                     dcc.RadioItems(
                         id='options',
@@ -56,7 +60,9 @@ class Aplication:
                     ),
                     style={'text-align': 'left', 'display': 'table-cell', 'width':'5%', 'border': '1px solid green', 'vertical-align':'middle'}
                 )
-            ], style={'text-align':'center', 'border': '1px solid black', 'display': 'table', 'width':'100%'})
+
+            ], style={'text-align':'center', 'border': '1px solid black', 'display': 'table', 'width':'100%'}),
+            html.Div
         ])
 
 
