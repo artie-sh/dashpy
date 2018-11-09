@@ -44,10 +44,3 @@ class CsvReader:
             self.write_line(cur, line, table)
         conn.commit()
         conn.close()
-
-
-#c = CsvReader()
-#c.write_csv_to_db(c.csv_path, c.db_path, 'xrp')
-# r = c.read_db(c.connect_db(c.db_path))
-# for line in r:
-#     print line
