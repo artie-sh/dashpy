@@ -26,18 +26,18 @@ class CsvReader:
         return conn
 
     def read_db(self, cur, table):
-        return list(cur.execute('SELECT * FROM %s ORDER BY date asc' % table))
+        return list(cur.execute(f"SELECT * FROM {table} ORDER BY date asc"))
 
     def write_line(self, cur, line, table):
-        cur.execute('INSERT INTO %s (date, open, high, low, close) VALUES (?, ?, ?, ?, ?)' % table,
+        cur.execute(f"INSERT INTO {table} (date, open, high, low, close) VALUES (?, ?, ?, ?, ?)",
                     (line['date'], line['open'], line['high'], line['low'], line['close']))
-        print '%s, %s, %s, %s, %s, %s' % (table, line['date'], line['open'], line['high'], line['low'], line['close'])
+        print(f"{table}, {line['date']}, {line['open']}, {line['high']}, {line['low']}, {line['close']}")
 
     def write_csv_to_db(self, csv, db, table):
         conn = self.connect_db(db)
         cur = conn.cursor()
-        cur.execute('DROP TABLE IF EXISTS %s' % table)
-        cur.execute('CREATE TABLE %s (date TEXT, open FLOAT, high FLOAT, low FLOAT, close FLOAT)' % table)
+        cur.execute(f"DROP TABLE IF EXISTS {table}")
+        cur.execute(f"CREATE TABLE {table} (date TEXT, open FLOAT, high FLOAT, low FLOAT, close FLOAT)")
         conn.commit()
         data = self.read_file(csv)
         for line in data[1:]:

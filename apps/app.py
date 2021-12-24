@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from database_writer import CsvReader
 from dash.dependencies import Input, Output
 from data_processor import DataProcessor
@@ -49,7 +49,7 @@ class Aplication:
                             options=[{'label': option, 'value': option} for option in opts],
                             value='open'
                             ),
-                    style={'display': 'table', 'text-align': 'center', 'border': '1px solid red', 'height':'50%', 'width':'100%'}
+                    style={'display': 'table', 'text-align': 'left', 'border': '1px solid red', 'height':'50%', 'width':'100%', 'vertical-align': 'middle'}
         )
 
     def get_ma_input(self):
@@ -62,7 +62,7 @@ class Aplication:
                             value=10
                         ),
                     ],
-                    style={'display': 'table', 'height':'50%', 'border': '1px solid green', 'horizontal-align':'middle'}
+                    style={'display': 'table', 'height':'50%', 'border': '1px solid green', 'horizontal-align':'middle', 'vertical-align': 'bottom'}
         )
 
     def draw_layout(self):
@@ -78,7 +78,7 @@ class Aplication:
                                                     ),
                                                     html.Div(
                                                         children=[
-                                                            self.get_radiobuttons(['open', 'close']),
+                                                            self.get_radiobuttons(['open', 'close', 'low', 'high']),
                                                             self.get_ma_input()
                                                         ],
                                                         style={'display': 'table-cell', 'border': '1px solid green', 'vertical-align':'middle'}

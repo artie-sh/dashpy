@@ -14,7 +14,7 @@ def getData(df):
         coords[dateparser.parse(r[0])] = r[2]
 
     for item in sorted(coords.keys()):
-        print '%s - %s' % (item, coords[item])
+        print(f"{item} - {coords[item]}")
 
 
 getData(df)
